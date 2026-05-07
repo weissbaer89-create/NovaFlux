@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIT PROFILE // DR. NOVA FLUX</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #040810;
+    --panel: #070f1c;
+    --panel2: #0a1525;
+    --cyan: #00e5ff;
+    --cyan-dim: #0099bb;
+    --cyan-glow: rgba(0,229,255,0.12);
+    --red: #ff2244;
+    --red-dim: #991122;
+    --green: #00ff88;
+    --green-dim: #005533;
+    --amber: #ffaa00;
+    --amber-dim: #664400;
+    --purple: #cc44ff;
+    --purple-dim: #661188;
+    --text: #c8e8ff;
+    --text-dim: #4a6a88;
+    --border: rgba(0,229,255,0.15);
+    --border-bright: rgba(0,229,255,0.5);
+    --scanline: rgba(0,229,255,0.025);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanlines */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, var(--scanline) 2px, var(--scanline) 4px);
+    pointer-events:none; z-index:1000;
+  }
+  /* Vignette */
+  body::after {
+    content:'';
+    position:fixed; inset:0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.75) 100%);
+    pointer-events:none; z-index:999;
+  }
+
+  /* Grid BG */
+  .grid-bg {
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events:none; z-index:0;
+  }
+
+  /* Hex pattern accent */
+  .hex-bg {
+    position:fixed; top:0; right:0; width:40%; height:100%;
+    opacity:0.03;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0-4l24-14V18L28 4 4 18v30l24 14z' fill='%2300e5ff'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:0;
+  }
+
+  .container {
+    position:relative; z-index:10;
+    max-width:1280px;
+    margin:0 auto;
+    padding:24px 20px 40px;
+  }
+
+  /* ======================== HEADER ======================== */
+  .header {
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:20px; margin-bottom:20px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--border-bright);
+    position:relative;
+    animation: fadeIn 0.6s ease;
+  }
+  .header::after {
+    content:'';
+    position:absolute; bottom:-1px; left:0;
+    width:55%; height:1px;
+    background: var(--cyan);
+    box-shadow: 0 0 16px var(--cyan);
+  }
+  .header-left {}
+  .sys-label {
+    font-family:'Orbitron',monospace; font-size:9px;
+    letter-spacing:5px; color:var(--cyan-dim);
+    margin-bottom:6px;
+    animation: flicker 9s infinite;
+  }
+  .unit-title {
+    font-family:'Orbitron',monospace;
+    font-size:clamp(18px,3.5vw,36px);
+    font-weight:900;
+    color:var(--cyan);
+    text-shadow: 0 0 24px var(--cyan), 0 0 60px rgba(0,229,255,0.2);
+    letter-spacing:5px; line-height:1;
+  }
+  .unit-alias {
+    font-family:'Rajdhani',sans-serif;
+    font-size:clamp(12px,2vw,20px); font-weight:300;
+    color:var(--amber); letter-spacing:4px;
+    margin-top:4px;
+    text-shadow: 0 0 10px rgba(255,170,0,0.4);
+  }
+  .unit-class {
+    font-size:11px; color:var(--text-dim);
+    letter-spacing:2px; margin-top:8px;
+  }
+  .header-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .status-badge {
+    display:flex; align-items:center; gap:8px;
+    background: rgba(0,255,136,0.07);
+    border:1px solid rgba(0,255,136,0.25);
+    padding:7px 14px;
+    font-size:10px; letter-spacing:3px;
+    color:var(--green);
+    font-family:'Orbitron',monospace;
+  }
+  .status-dot {
+    width:7px; height:7px; border-radius:50%;
+    background:var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse-green 2s infinite;
+  }
+  .unit-id {
+    font-size:10px; color:var(--text-dim);
+    letter-spacing:2px;
+  }
+  .unit-id span { color:var(--cyan-dim); }
+
+  /* ======================== LAYOUT ======================== */
+  .main-grid {
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:16px;
+    animation: fadeIn 0.8s ease 0.1s both;
+  }
+  .left-col { display:flex; flex-direction:column; gap:16px; }
+  .right-col { display:flex; flex-direction:column; gap:16px; }
+
+  /* ======================== PANEL ======================== */
+  .panel {
+    background:var(--panel);
+    border:1px solid var(--border);
+    position:relative; overflow:hidden;
+  }
+  .panel::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity:0.4;
+  }
+  .panel .c { position:absolute; width:10px; height:10px; border-color:var(--cyan); border-style:solid; opacity:0.5; }
+  .panel .c.tl { top:0;left:0; border-width:2px 0 0 2px; }
+  .panel .c.tr { top:0;right:0; border-width:2px 2px 0 0; }
+  .panel .c.bl { bottom:0;left:0; border-width:0 0 2px 2px; }
+  .panel .c.br { bottom:0;right:0; border-width:0 2px 2px 0; }
+
+  .panel-header {
+    padding:9px 14px;
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:8px;
+    background: rgba(0,229,255,0.03);
+  }
+  .panel-title {
+    font-family:'Orbitron',monospace;
+    font-size:9px; letter-spacing:3px;
+    color:var(--cyan); text-transform:uppercase;
+  }
+  .panel-icon { font-size:11px; color:var(--cyan); opacity:0.7; }
+  .panel-body { padding:14px; }
+
+  /* ======================== PORTRAIT ======================== */
+  .portrait-area {
+    width:100%; aspect-ratio:0.85;
+    background:linear-gradient(145deg, #0a1a2e 0%, #040810 100%);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+  }
+  .portrait-svg { width:75%; height:75%; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3)); }
+  .portrait-scanline {
+    position:absolute; top:-100%; left:0; right:0; height:50%;
+    background:linear-gradient(180deg, transparent, rgba(0,229,255,0.05), transparent);
+    animation: scan 5s linear infinite;
+  }
+  .portrait-grid {
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size:20px 20px;
+  }
+  .portrait-overlay {
+    position:absolute; bottom:0; left:0; right:0;
+    background:linear-gradient(transparent, rgba(4,8,16,0.95));
+    padding:20px 12px 10px;
+  }
+  .portrait-name {
+    font-family:'Orbitron',monospace;
+    font-size:13px; font-weight:700;
+    color:var(--cyan);
+    text-shadow:0 0 12px var(--cyan);
+    letter-spacing:2px;
+  }
+  .portrait-sub {
+    font-size:9px; color:var(--amber);
+    letter-spacing:2px; margin-top:3px;
+  }
+  /* Eye glow effect */
+  .eye-right { fill:var(--cyan); filter: url(#glow); }
+  .implant-line { stroke:var(--cyan); stroke-width:0.5; opacity:0.6; }
+
+  /* ======================== ID ROWS ======================== */
+  .id-grid { display:flex; flex-direction:column; gap:0; }
+  .id-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:7px 0;
+    border-bottom:1px solid rgba(0,229,255,0.06);
+  }
+  .id-row:last-child { border-bottom:none; }
+  .id-label { font-size:9px; color:var(--text-dim); letter-spacing:1px; }
+  .id-value {
+    font-size:11px; color:var(--text);
+    font-family:'Share Tech Mono',monospace;
+  }
+  .id-value[contenteditable="true"] {
+    outline:none;
+    border-bottom:1px dashed rgba(0,229,255,0.3);
+    min-width:60px; text-align:right;
+    cursor:text; transition:all 0.2s;
+  }
+  .id-value[contenteditable="true"]:focus {
+    border-bottom-color:var(--cyan);
+    color:var(--cyan);
+    text-shadow:0 0 8px rgba(0,229,255,0.5);
+  }
+  .id-value.highlight { color:var(--amber); }
+  .id-value.danger { color:var(--red); }
+  .id-value.good { color:var(--green); }
+
+  /* ======================== VITALS ======================== */
+  .vital { margin-bottom:13px; }
+  .vital:last-child { margin-bottom:0; }
+  .vital-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+  .vital-name { font-size:9px; letter-spacing:2px; color:var(--text-dim); }
+  .vital-nums { font-family:'Orbitron',monospace; font-size:11px; }
+  .vital-bar { height:3px; background:rgba(255,255,255,0.05); cursor:pointer; position:relative; }
+  .vital-fill { height:100%; transition:width 0.4s ease; position:relative; }
+  .vital-fill::after { content:''; position:absolute; right:-2px; top:50%; transform:translateY(-50%); width:5px; height:5px; border-radius:50%; }
+  /* HP */
+  .vital-hp .vital-nums { color:var(--red); }
+  .vital-hp .vital-fill { background:linear-gradient(90deg,var(--red-dim),var(--red)); box-shadow:0 0 6px var(--red); }
+  .vital-hp .vital-fill::after { background:var(--red); box-shadow:0 0 6px var(--red); }
+  /* Stamina */
+  .vital-st .vital-nums { color:var(--amber); }
+  .vital-st .vital-fill { background:linear-gradient(90deg,var(--amber-dim),var(--amber)); box-shadow:0 0 6px var(--amber); }
+  .vital-st .vital-fill::after { background:var(--amber); box-shadow:0 0 6px var(--amber); }
+  /* Sanity */
+  .vital-sn .vital-nums { color:var(--purple); }
+  .vital-sn .vital-fill { background:linear-gradient(90deg,var(--purple-dim),var(--purple)); box-shadow:0 0 6px var(--purple); }
+  .vital-sn .vital-fill::after { background:var(--purple); box-shadow:0 0 6px var(--purple); }
+  /* Energy */
+  .vital-en .vital-nums { color:var(--cyan); }
+  .vital-en .vital-fill { background:linear-gradient(90deg,var(--cyan-dim),var(--cyan)); box-shadow:0 0 6px var(--cyan); }
+  .vital-en .vital-fill::after { background:var(--cyan); box-shadow:0 0 6px var(--cyan); }
+
+  /* ======================== STAT CARDS ======================== */
+  .stats-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .stat-card {
+    background:var(--panel2);
+    border:1px solid var(--border);
+    padding:12px;
+    position:relative;
+    transition:border-color 0.2s, box-shadow 0.2s;
+    cursor:default;
+  }
+  .stat-card:hover {
+    border-color:rgba(0,229,255,0.4);
+    box-shadow:0 0 14px rgba(0,229,255,0.08);
+  }
+  .stat-cat { font-size:7px; letter-spacing:2px; color:var(--text-dim); margin-bottom:4px; }
+  .stat-name {
+    font-family:'Rajdhani',sans-serif;
+    font-size:12px; font-weight:600; letter-spacing:1px;
+    color:var(--text); margin-bottom:8px; line-height:1.2;
+  }
+  .stat-num-row { display:flex; align-items:baseline; gap:3px; }
+  .stat-num {
+    font-family:'Orbitron',monospace;
+    font-size:clamp(22px,3vw,30px); font-weight:700;
+    color:var(--cyan);
+    text-shadow:0 0 14px rgba(0,229,255,0.4);
+    line-height:1;
+    cursor:text; outline:none;
+    border-bottom:1px solid transparent;
+    transition:all 0.2s;
+  }
+  .stat-num:focus {
+    border-bottom-color:var(--cyan);
+    text-shadow:0 0 20px var(--cyan);
+  }
+  .stat-max {
+    font-size:11px; color:var(--text-dim);
+    font-family:'Orbitron',monospace;
+  }
+  .stat-bar-mini {
+    height:2px; background:rgba(255,255,255,0.05);
+    margin-top:8px; position:relative;
+  }
+  .stat-bar-fill {
+    height:100%; background:var(--cyan);
+    box-shadow:0 0 4px var(--cyan);
+    transition:width 0.3s;
+  }
+  /* Colored variants */
+  .stat-card.amber .stat-num { color:var(--amber); text-shadow:0 0 14px rgba(255,170,0,0.4); }
+  .stat-card.amber .stat-num:focus { border-bottom-color:var(--amber); }
+  .stat-card.amber .stat-bar-fill { background:var(--amber); box-shadow:0 0 4px var(--amber); }
+  .stat-card.red .stat-num { color:var(--red); text-shadow:0 0 14px rgba(255,34,68,0.4); }
+  .stat-card.red .stat-num:focus { border-bottom-color:var(--red); }
+  .stat-card.red .stat-bar-fill { background:var(--red); box-shadow:0 0 4px var(--red); }
+  .stat-card.green .stat-num { color:var(--green); text-shadow:0 0 14px rgba(0,255,136,0.4); }
+  .stat-card.green .stat-num:focus { border-bottom-color:var(--green); }
+  .stat-card.green .stat-bar-fill { background:var(--green); box-shadow:0 0 4px var(--green); }
+  .stat-card.purple .stat-num { color:var(--purple); text-shadow:0 0 14px rgba(204,68,255,0.4); }
+  .stat-card.purple .stat-num:focus { border-bottom-color:var(--purple); }
+  .stat-card.purple .stat-bar-fill { background:var(--purple); box-shadow:0 0 4px var(--purple); }
+
+  /* ======================== ABILITIES ======================== */
+  .ability-list { display:flex; flex-direction:column; gap:8px; }
+  .ability {
+    display:flex; align-items:flex-start; gap:12px;
+    background:var(--panel2);
+    border:1px solid var(--border);
+    padding:10px 12px;
+    transition:border-color 0.2s;
+    position:relative; overflow:hidden;
+  }
+  .ability::before {
+    content:'';
+    position:absolute; left:0; top:0; bottom:0; width:2px;
+    background:var(--cyan);
+    box-shadow:0 0 6px var(--cyan);
+  }
+  .ability.amber::before { background:var(--amber); box-shadow:0 0 6px var(--amber); }
+  .ability.red::before { background:var(--red); box-shadow:0 0 6px var(--red); }
+  .ability.green::before { background:var(--green); box-shadow:0 0 6px var(--green); }
+  .ability.purple::before { background:var(--purple); box-shadow:0 0 6px var(--purple); }
+  .ability-icon { font-size:18px; line-height:1; flex-shrink:0; margin-top:1px; }
+  .ability-right { flex:1; }
+  .ability-name {
+    font-family:'Rajdhani',sans-serif;
+    font-size:13px; font-weight:700; letter-spacing:1px;
+    color:var(--text); margin-bottom:2px;
+  }
+  .ability-desc { font-size:10px; color:var(--text-dim); line-height:1.5; }
+  .ability-tags { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
+  .tag {
+    font-size:8px; letter-spacing:1px; padding:2px 6px;
+    border:1px solid var(--border); color:var(--text-dim);
+    font-family:'Orbitron',monospace;
+  }
+  .tag.warn { border-color:rgba(255,34,68,0.3); color:var(--red); }
+  .tag.ok { border-color:rgba(0,255,136,0.3); color:var(--green); }
+  .tag.info { border-color:rgba(0,229,255,0.3); color:var(--cyan); }
+  .tag.energy { border-color:rgba(255,170,0,0.3); color:var(--amber); }
+
+  /* ======================== IMPLANTS ======================== */
+  .implant-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .implant {
+    background:var(--panel2);
+    border:1px solid var(--border);
+    padding:10px 12px;
+    position:relative;
+  }
+  .implant-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+  .implant-name { font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:600; color:var(--text); letter-spacing:1px; }
+  .implant-status {
+    font-size:8px; letter-spacing:1px;
+    font-family:'Orbitron',monospace;
+    padding:2px 6px; border:1px solid;
+  }
+  .implant-status.active { color:var(--green); border-color:rgba(0,255,136,0.3); }
+  .implant-status.warm { color:var(--amber); border-color:rgba(255,170,0,0.3); }
+  .implant-status.caution { color:var(--red); border-color:rgba(255,34,68,0.3); }
+  .implant-desc { font-size:9px; color:var(--text-dim); line-height:1.5; }
+  .implant-heat { height:2px; background:rgba(255,255,255,0.05); margin-top:8px; }
+  .implant-heat-fill { height:100%; }
+
+  /* ======================== GADGETS ======================== */
+  .gadget-list { display:flex; flex-direction:column; gap:8px; }
+  .gadget {
+    display:flex; align-items:center; gap:12px;
+    background:var(--panel2); border:1px solid var(--border);
+    padding:10px 12px;
+  }
+  .gadget-icon { font-size:20px; flex-shrink:0; }
+  .gadget-info { flex:1; }
+  .gadget-name { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:600; color:var(--text); letter-spacing:1px; }
+  .gadget-desc { font-size:10px; color:var(--text-dim); line-height:1.4; margin-top:2px; }
+  .gadget-charges {
+    display:flex; gap:3px; flex-direction:column; align-items:flex-end;
+    font-family:'Orbitron',monospace; font-size:10px; color:var(--cyan-dim);
+  }
+  .charge-pips { display:flex; gap:3px; }
+  .pip { width:8px; height:8px; border:1px solid var(--cyan-dim); border-radius:1px; }
+  .pip.full { background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 4px var(--cyan); }
+
+  /* ======================== NOTES ======================== */
+  .notes-area {
+    width:100%; background:transparent;
+    border:none; color:var(--text-dim);
+    font-family:'Share Tech Mono',monospace;
+    font-size:11px; line-height:1.8;
+    resize:vertical; min-height:90px;
+    outline:none;
+  }
+  .notes-area:focus { color:var(--text); }
+
+  /* ======================== PERSONALITY ======================== */
+  .trait-list { display:flex; flex-wrap:wrap; gap:6px; }
+  .trait {
+    font-size:9px; letter-spacing:1.5px;
+    padding:4px 10px; border:1px solid var(--border);
+    color:var(--text-dim);
+    font-family:'Orbitron',monospace;
+    transition:all 0.2s; cursor:default;
+  }
+  .trait:hover { border-color:var(--cyan-dim); color:var(--text); }
+
+  /* ======================== BOTTOM STRIP ======================== */
+  .bottom-strip {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 0; margin-top:8px;
+    border-top:1px solid var(--border);
+    font-size:9px; color:var(--text-dim); letter-spacing:2px;
+    animation: fadeIn 1s ease 0.3s both;
+  }
+  .edit-hint { color:rgba(0,229,255,0.3); font-size:8px; letter-spacing:1px; }
+
+  /* ======================== ANIMATIONS ======================== */
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  @keyframes flicker {
+    0%,95%,100% { opacity:1; }
+    96% { opacity:0.6; }
+    97% { opacity:1; }
+    98% { opacity:0.4; }
+    99% { opacity:1; }
+  }
+  @keyframes pulse-green {
+    0%,100% { box-shadow:0 0 6px var(--green); opacity:1; }
+    50% { box-shadow:0 0 14px var(--green); opacity:0.7; }
+  }
+  @keyframes scan {
+    0% { top:-100%; }
+    100% { top:200%; }
+  }
+  @keyframes heartbeat {
+    0%,100% { transform:scale(1); }
+    10% { transform:scale(1.04); }
+    20% { transform:scale(0.98); }
+    30% { transform:scale(1.02); }
+  }
+  .heartbeat { animation:heartbeat 1.4s infinite; }
+
+  /* Responsive */
+  @media (max-width:800px) {
+    .main-grid { grid-template-columns:1fr; }
+    .stats-grid { grid-template-columns:repeat(2,1fr); }
+    .implant-grid { grid-template-columns:1fr; }
+  }
+  @media (max-width:500px) {
+    .stats-grid { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="hex-bg"></div>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="sys-label">◈ CYBERMED EINHEITEN-DATENBANK // ZUGRIFF GEWÄHRT</div>
+      <div class="unit-title">DR. NOVA FLUX</div>
+      <div class="unit-alias">// "PULS" //</div>
+      <div class="unit-class">CYBERMEDIZINISCHE NOTFALLSANITÄTERIN &nbsp;·&nbsp; HALB MENSCH / HALB MED-SYSTEM</div>
+    </div>
+    <div class="header-right">
+      <div class="status-badge"><div class="status-dot"></div>EINSATZBEREIT</div>
+      <div class="unit-id">ID: <span>NF-7734-MEDX</span> &nbsp;|&nbsp; KLASSE: <span>ALPHA-MEDIC</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <!-- PORTRAIT -->
+      <div class="panel">
+        <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+        <div class="portrait-area">
+          <div class="portrait-grid"></div>
+          <div class="portrait-scanline"></div>
+ <img src="PortraitS.png" alt="Portrait" width="278" >
+          <div class="portrait-overlay">
+            <div class="portrait-name">NOVA FLUX</div>
+            <div class="portrait-sub">⬡ MED-SYSTEM AKTIV &nbsp;·&nbsp; SCANNER ONLINE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ID / INFO -->
+      <div class="panel">
+        <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+        <div class="panel-header"><span class="panel-icon">◈</span><span class="panel-title">Einheitendaten</span></div>
+        <div class="panel-body">
+          <div class="id-grid">
+            <div class="id-row">
+              <span class="id-label">DESIGNATION</span>
+              <span class="id-value highlight" contenteditable="true">Dr. Nova „Puls" Flux</span>
+            </div>
+            <div class="id-row">
+              <span class="id-label">SPEZIES</span>
+              <span class="id-value" contenteditable="true">Halb Mensch / Halb Med-Sys</span>
+            </div>
+            <div class="id-row">
+              <span class="id-label">KLASSE</span>
+              <span class="id-value good" contenteditable="true">Cybermedic Alpha</span>
+            </div>
+            <div class="id-row">
+              <span class="id-label">LEVEL</span>
+              <span class="id-value highlight" contenteditable="true">---</span>
+            </div>
+            <div class="id-row">
+              <span class="id-label">ERFAHRUNG</span>
+              <span class="id-value" contenteditable="true">0 / 1000 XP</span>
+            </div>
+            <div class="id-row">
+              <span class="id-label">FRAKTION</span>
+              <span class="id-value" contenteditable="true">Unabhängig</span>
+            </div>
+            <div class="id-row">
+              <span class="id-label">AUFENTHALT</span>
+              <span class="id-value" contenteditable="true">Koloniestation IX</span>
+            </div>
+            <div class="id-row">
+              <span class="id-label">ENERGY-RATION</span>
+              <span class="id-value danger">⚠ KRITISCH HOCH</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VITALS -->
+      <div class="panel">
+        <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+        <div class="panel-header"><span class="panel-icon">♥</span><span class="panel-title">Vitalwerte</span></div>
+        <div class="panel-body">
+          <div class="vital vital-hp" id="v-hp">
+            <div class="vital-top">
+              <span class="vital-name">TREFFERPUNKTE</span>
+              <span class="vital-nums"><span class="v-cur" contenteditable="true" onclick="event.stopPropagation()">80</span> / <span class="v-max" contenteditable="true" onclick="event.stopPropagation()">100</span></span>
+            </div>
+            <div class="vital-bar" onclick="adjustVital(this,'v-hp')"><div class="vital-fill" style="width:80%"></div></div>
+          </div>
+          <div class="vital vital-en" id="v-en">
+            <div class="vital-top">
+              <span class="vital-name">ENERGIERESERVE (IMPLANTATE)</span>
+              <span class="vital-nums"><span class="v-cur" contenteditable="true" onclick="event.stopPropagation()">60</span> / <span class="v-max" contenteditable="true" onclick="event.stopPropagation()">100</span></span>
+            </div>
+            <div class="vital-bar" onclick="adjustVital(this,'v-en')"><div class="vital-fill" style="width:60%"></div></div>
+          </div>
+          <div class="vital vital-st" id="v-st">
+            <div class="vital-top">
+              <span class="vital-name">AUSDAUER</span>
+              <span class="vital-nums"><span class="v-cur" contenteditable="true" onclick="event.stopPropagation()">70</span> / <span class="v-max" contenteditable="true" onclick="event.stopPropagation()">100</span></span>
+            </div>
+            <div class="vital-bar" onclick="adjustVital(this,'v-st')"><div class="vital-fill" style="width:70%"></div></div>
+          </div>
+          <div class="vital vital-sn" id="v-sn">
+            <div class="vital-top">
+              <span class="vital-name">GEISTIGE STABILITÄT</span>
+              <span class="vital-nums"><span class="v-cur" contenteditable="true" onclick="event.stopPropagation()">55</span> / <span class="v-max" contenteditable="true" onclick="event.stopPropagation()">100</span></span>
+            </div>
+            <div class="vital-bar" onclick="adjustVital(this,'v-sn')"><div class="vital-fill" style="width:55%"></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <!-- STATS -->
+      <div class="panel">
+        <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+        <div class="panel-header"><span class="panel-icon">◈</span><span class="panel-title">Attribute &amp; Fertigkeiten</span></div>
+        <div class="panel-body">
+          <div class="stats-grid">
+
+            <div class="stat-card green">
+              <div class="stat-cat">MEDIZIN</div>
+              <div class="stat-name">Chirurgie & Notfallmed.</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">18</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:90%"></div></div>
+            </div>
+
+            <div class="stat-card green">
+              <div class="stat-cat">MEDIZIN</div>
+              <div class="stat-name">Pharmakologie & Gifte</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">16</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:80%"></div></div>
+            </div>
+
+            <div class="stat-card green">
+              <div class="stat-cat">MEDIZIN</div>
+              <div class="stat-name">Diagnostik & Scan</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">20</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:100%"></div></div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-cat">TECHNIK</div>
+              <div class="stat-name">Implantat-Wartung</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">14</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:70%"></div></div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-cat">TECHNIK</div>
+              <div class="stat-name">Drohnensteuerung</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">12</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:60%"></div></div>
+            </div>
+
+            <div class="stat-card amber">
+              <div class="stat-cat">WISSEN</div>
+              <div class="stat-name">Biokybernetik</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">17</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:85%"></div></div>
+            </div>
+
+            <div class="stat-card red">
+              <div class="stat-cat">KAMPF</div>
+              <div class="stat-name">Nahkampf (defensiv)</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">8</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:40%"></div></div>
+            </div>
+
+            <div class="stat-card red">
+              <div class="stat-cat">KAMPF</div>
+              <div class="stat-name">Defibrillator-Impuls</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">15</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:75%"></div></div>
+            </div>
+
+            <div class="stat-card purple">
+              <div class="stat-cat">SOZIAL</div>
+              <div class="stat-name">Einschüchterung</div>
+              <div class="stat-num-row">
+                <span class="stat-num" contenteditable="true" oninput="updateBar(this)">13</span>
+                <span class="stat-max">/ 20</span>
+              </div>
+              <div class="stat-bar-mini"><div class="stat-bar-fill" style="width:65%"></div></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- IMPLANTS & CYBERWARE -->
+      <div class="panel">
+        <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+        <div class="panel-header"><span class="panel-icon">⬡</span><span class="panel-title">Implantate & Cyberware</span></div>
+        <div class="panel-body">
+          <div class="implant-grid">
+
+            <div class="implant">
+              <div class="implant-header">
+                <div class="implant-name">♥ Hochleistungspumpe</div>
+                <div class="implant-status warm">WARM</div>
+              </div>
+              <div class="implant-desc">Ersetzt das biologische Herz. Integrierter Defibrillator. Hörbar unter Stress. Nicht für Dauerbelastung ausgelegt – Überhitzungsgefahr.</div>
+              <div class="implant-heat"><div class="implant-heat-fill" style="width:45%; background:linear-gradient(90deg,#664400,#ffaa00); box-shadow:0 0 4px #ffaa00;"></div></div>
+            </div>
+
+            <div class="implant">
+              <div class="implant-header">
+                <div class="implant-name">👁 Med-Scanner Auge</div>
+                <div class="implant-status active">ONLINE</div>
+              </div>
+              <div class="implant-desc">Rechtes Auge (human links). Analysiert Körperzustände in Sekunden. Zeigt Vitalwerte, Verletzungen, Schwachpunkte. Opt.: Durchsicht.</div>
+              <div class="implant-heat"><div class="implant-heat-fill" style="width:20%; background:linear-gradient(90deg,#005533,#00ff88); box-shadow:0 0 4px #00ff88;"></div></div>
+            </div>
+
+            <div class="implant">
+              <div class="implant-header">
+                <div class="implant-name">🧠 Diagnostik-KI</div>
+                <div class="implant-status active">ONLINE</div>
+              </div>
+              <div class="implant-desc">Nervensystemerweiterung. Verarbeitet Patienten­daten in Echtzeit. Kann nicht abgeschaltet werden. Läuft permanent.</div>
+              <div class="implant-heat"><div class="implant-heat-fill" style="width:30%; background:linear-gradient(90deg,#0099bb,#00e5ff); box-shadow:0 0 4px #00e5ff;"></div></div>
+            </div>
+
+            <div class="implant">
+              <div class="implant-header">
+                <div class="implant-name">⚡ Energie-Knoten</div>
+                <div class="implant-status caution">60%</div>
+              </div>
+              <div class="implant-desc">Powergrid für alle Implantate. Gekoppelt an Nahrungsaufnahme. Leer = Heilfähigkeiten offline. Niedriger Stand = kritisch.</div>
+              <div class="implant-heat"><div class="implant-heat-fill" style="width:60%; background:linear-gradient(90deg,#003344,#00e5ff); box-shadow:0 0 4px #00e5ff;"></div></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ABILITIES & SKILLS -->
+      <div class="panel">
+        <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+        <div class="panel-header"><span class="panel-icon">◈</span><span class="panel-title">Fähigkeiten & Aktionen</span></div>
+        <div class="panel-body">
+          <div class="ability-list">
+
+            <div class="ability green">
+              <div class="ability-icon">💉</div>
+              <div class="ability-right">
+                <div class="ability-name">AKUT-HEILUNG</div>
+                <div class="ability-desc">Schließt Wunden, unterdrückt Schmerzen, neutralisiert Gifte. Improvisierte Operationen auch im Feld möglich. Selbstheilung nur notdürftig.</div>
+                <div class="ability-tags">
+                  <span class="tag energy">⚡ ENERGIE</span>
+                  <span class="tag ok">VERBÜNDETE</span>
+                  <span class="tag info">TAKTISCH</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ability red">
+              <div class="ability-icon">⚡</div>
+              <div class="ability-right">
+                <div class="ability-name">DEFIBRILLATOR-IMPULS</div>
+                <div class="ability-desc">Reanimiert Verbündete ODER lähmt Gegner. Der Impuls unterscheidet nicht zwischen Freund und Feind – Nähe ist ein Risiko für alle.</div>
+                <div class="ability-tags">
+                  <span class="tag warn">⚠ FREUNDSCHAFTSFEUER</span>
+                  <span class="tag energy">⚡ ENERGIE</span>
+                  <span class="tag warn">ÜBERHITZUNG</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ability">
+              <div class="ability-icon">👁</div>
+              <div class="ability-right">
+                <div class="ability-name">DIAGNOSTIK-SCAN</div>
+                <div class="ability-desc">Analysiert Ziel in Sekunden: Vitalwerte, Verletzungen, Schwachstellen, Toxine. Optional durch Wände / dünne Materialien aktiv.</div>
+                <div class="ability-tags">
+                  <span class="tag info">PASSIV</span>
+                  <span class="tag ok">ECHTZEIT</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ability amber">
+              <div class="ability-icon">🛸</div>
+              <div class="ability-right">
+                <div class="ability-name">MINI-OP-DROHNE</div>
+                <div class="ability-desc">Autonome Operationsdrohne für präzise Eingriffe auf Distanz. Kann Verbündete stabilisieren ohne direkten Körperkontakt.</div>
+                <div class="ability-tags">
+                  <span class="tag info">FERNWIRKUNG</span>
+                  <span class="tag energy">⚡ ENERGIE</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="ability purple">
+              <div class="ability-icon">🩺</div>
+              <div class="ability-right">
+                <div class="ability-name">IMPROVISIERTE MED-GUN</div>
+                <div class="ability-desc">Multifunktionale Waffe: Injiziert Heilmittel, Sedativa oder Gifte auf Distanz. Taktisch, indirekt – keine Direktkampflösung.</div>
+                <div class="ability-tags">
+                  <span class="tag info">REICHWEITE</span>
+                  <span class="tag ok">VIELSEITIG</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW: Gadgets + Persönlichkeit -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+        <!-- GADGETS -->
+        <div class="panel">
+          <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+          <div class="panel-header"><span class="panel-icon">⬡</span><span class="panel-title">Ausrüstung</span></div>
+          <div class="panel-body">
+            <div class="gadget-list">
+              <div class="gadget">
+                <div class="gadget-icon">🔫</div>
+                <div class="gadget-info">
+                  <div class="gadget-name">Med-Gun (Multifunction)</div>
+                  <div class="gadget-desc">Heilmittel / Sedativa / Gifte</div>
+                </div>
+                <div class="gadget-charges">
+                  <div class="charge-pips">
+                    <div class="pip full"></div><div class="pip full"></div><div class="pip full"></div><div class="pip full"></div><div class="pip"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="gadget">
+                <div class="gadget-icon">🛸</div>
+                <div class="gadget-info">
+                  <div class="gadget-name">Mini-OP-Drohne</div>
+                  <div class="gadget-desc">Autonome Fernchirurgie</div>
+                </div>
+                <div class="gadget-charges">
+                  <div class="charge-pips">
+                    <div class="pip full"></div><div class="pip full"></div><div class="pip"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="gadget">
+                <div class="gadget-icon">🧰</div>
+                <div class="gadget-info">
+                  <div class="gadget-name">Ersatzteillager</div>
+                  <div class="gadget-desc">Bio-Gel, Injektoren, Implantate</div>
+                </div>
+                <div class="gadget-charges">
+                  <div class="charge-pips">
+                    <div class="pip full"></div><div class="pip full"></div><div class="pip full"></div><div class="pip full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PERSÖNLICHKEIT + NOTIZEN -->
+        <div class="panel">
+          <div class="c tl"></div><div class="c tr"></div><div class="c bl"></div><div class="c br"></div>
+          <div class="panel-header"><span class="panel-icon">◈</span><span class="panel-title">Persönlichkeit</span></div>
+          <div class="panel-body">
+            <div class="trait-list" style="margin-bottom:14px;">
+              <span class="trait">SARKASMUS</span>
+              <span class="trait">EMOTIONAL DISTANZIERT</span>
+              <span class="trait">RETTER-INSTINKT</span>
+              <span class="trait">GALLOWS HUMOR</span>
+              <span class="trait">PRINZIPIENTREU</span>
+              <span class="trait">ÜBERESSEND</span>
+            </div>
+            <div style="border-top:1px solid var(--border); padding-top:10px;">
+              <div class="panel-title" style="margin-bottom:8px; font-size:8px;">◈ SITZUNGSNOTIZEN</div>
+              <textarea class="notes-area" placeholder="// Notizen, Status-Updates, Ereignisse...&#10;// Klicken zum Bearbeiten..."></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /bottom row -->
+
+    </div><!-- /right -->
+  </div><!-- /main-grid -->
+
+  <div class="bottom-strip">
+    <span>CYBERMED-DB v4.7.2 &nbsp;·&nbsp; ZUGRIFF: AUTHORISIERT &nbsp;·&nbsp; SESSION AKTIV</span>
+    <span class="edit-hint">// ALLE FELDER EDITIERBAR — KLICKEN ZUM ÄNDERN</span>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  // Update stat bar when number changes
+  function updateBar(el) {
+    const card = el.closest('.stat-card');
+    const fill = card.querySelector('.stat-bar-fill');
+    const maxEl = card.querySelector('.stat-max');
+    const maxVal = parseInt(maxEl.textContent.replace(/\D/g,'')) || 20;
+    const val = Math.min(Math.max(parseInt(el.textContent) || 0, 0), maxVal);
+    fill.style.width = (val / maxVal * 100) + '%';
+  }
+
+  // Click bar to set vital
+  function adjustVital(barEl, id) {
+    const rect = barEl.getBoundingClientRect();
+    // just trigger update from existing cur/max
+    const panel = barEl.closest('.vital');
+    const cur = parseInt(panel.querySelector('.v-cur').textContent) || 0;
+    const max = parseInt(panel.querySelector('.v-max').textContent) || 100;
+    barEl.querySelector('.vital-fill').style.width = Math.min(100, cur/max*100) + '%';
+  }
+
+  // Live sync vital bars when editing
+  document.querySelectorAll('.v-cur, .v-max').forEach(el => {
+    el.addEventListener('input', () => {
+      const panel = el.closest('.vital');
+      const bar = panel.querySelector('.vital-bar');
+      adjustVital(bar);
+    });
+  });
+
+  // Heartbeat pulse text effect on heart implant
+  setInterval(() => {
+    const dot = document.querySelector('.status-dot');
+    if (dot) { dot.style.opacity = '0.4'; setTimeout(() => dot.style.opacity = '1', 150); }
+  }, 1400);
+
+  // Init all vital bars on load
+  document.querySelectorAll('.vital').forEach(panel => {
+    const bar = panel.querySelector('.vital-bar');
+    if (bar) adjustVital(bar);
+  });
+</script>
+</body>
+</html>
