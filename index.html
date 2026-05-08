@@ -193,7 +193,7 @@
   .portrait-svg { width:75%; height:75%; filter: drop-shadow(0 0 8px rgba(0,229,255,0.3)); }
   .portrait-scanline {
     position:absolute; top:-100%; left:0; right:0; height:50%;
-    background:linear-gradient(180deg, transparent, rgba(0,229,255,0.3), transparent);
+    background:linear-gradient(180deg, transparent, rgba(0,229,255,0.05), transparent);
     animation: scan 5s linear infinite;
   }
   .portrait-grid {
@@ -217,7 +217,7 @@
   }
   .portrait-sub {
     font-size:9px; color:var(--amber);
-    letter-spacing:1.9px; margin-top:3px;
+    letter-spacing:2px; margin-top:3px;
   }
   /* Eye glow effect */
   .eye-right { fill:var(--cyan); filter: url(#glow); }
@@ -480,6 +480,154 @@
   }
   .heartbeat { animation:heartbeat 1.4s infinite; }
 
+  /* ======================== BURGER MENU ======================== */
+  .burger-btn {
+    position: fixed;
+    top: 20px; right: 24px;
+    z-index: 2000;
+    background: var(--panel);
+    border: 1px solid var(--border-bright);
+    cursor: pointer;
+    width: 38px; height: 38px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 5px; padding: 8px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .burger-btn:hover {
+    border-color: var(--cyan);
+    box-shadow: 0 0 14px rgba(0,229,255,0.25);
+  }
+  .burger-btn.open {
+    border-color: var(--cyan);
+    box-shadow: 0 0 14px rgba(0,229,255,0.3);
+  }
+  /* corner markers on burger button */
+  .burger-btn::before, .burger-btn::after {
+    content: '';
+    position: absolute;
+    width: 6px; height: 6px;
+    border-color: var(--cyan); border-style: solid;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .burger-btn::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+  .burger-btn::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+  .burger-btn:hover::before, .burger-btn:hover::after,
+  .burger-btn.open::before, .burger-btn.open::after { opacity: 1; }
+
+  .burger-line {
+    width: 18px; height: 1px;
+    background: var(--cyan);
+    box-shadow: 0 0 4px rgba(0,229,255,0.6);
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+  .burger-btn.open .burger-line:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .burger-btn.open .burger-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .burger-btn.open .burger-line:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  .burger-overlay {
+    position: fixed; inset: 0;
+    background: rgba(4,8,16,0.75);
+    z-index: 1500;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(2px);
+  }
+  .burger-overlay.open { opacity: 1; pointer-events: all; }
+
+  .burger-nav {
+    position: fixed;
+    top: 0; right: -300px;
+    width: 280px; height: 100vh;
+    background: var(--panel);
+    border-left: 1px solid var(--border-bright);
+    z-index: 1800;
+    display: flex; flex-direction: column;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  /* top glow line */
+  .burger-nav::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    box-shadow: 0 0 12px var(--cyan);
+  }
+  /* hex pattern inside nav */
+  .burger-nav::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V16L28 0l28 16v34L28 66zm0-4l24-14V18L28 4 4 18v30l24 14z' fill='%2300e5ff'/%3E%3C/svg%3E");
+    opacity: 0.02; pointer-events: none; z-index: 0;
+  }
+  .burger-nav.open { right: 0; }
+
+  .burger-nav-header {
+    position: relative; z-index: 1;
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .burger-nav-sys {
+    font-family: 'Orbitron', monospace;
+    font-size: 8px; letter-spacing: 4px;
+    color: var(--cyan-dim); margin-bottom: 6px;
+    animation: flicker 9s infinite;
+  }
+  .burger-nav-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 12px; font-weight: 700; letter-spacing: 3px;
+    color: var(--cyan);
+    text-shadow: 0 0 12px var(--cyan);
+  }
+
+  .burger-links {
+    flex: 1; list-style: none;
+    padding: 10px 0; position: relative; z-index: 1;
+  }
+  .burger-links a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 18px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    color: var(--text-dim); text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .burger-links a:hover {
+    color: var(--cyan);
+    background: var(--cyan-glow);
+    border-left-color: var(--cyan);
+    text-shadow: 0 0 8px rgba(0,229,255,0.4);
+  }
+  .burger-links .nav-icon {
+    font-size: 10px; width: 14px; text-align: center;
+    color: var(--cyan); opacity: 0.6;
+  }
+  .burger-links a:hover .nav-icon { opacity: 1; }
+  .burger-links .nav-sep {
+    height: 1px; background: var(--border);
+    margin: 8px 18px;
+  }
+  .burger-links .nav-section-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 7px; letter-spacing: 3px;
+    color: var(--text-dim); opacity: 0.5;
+    padding: 10px 18px 4px;
+  }
+
+  .burger-nav-footer {
+    position: relative; z-index: 1;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px; color: var(--text-dim); letter-spacing: 2px;
+    flex-shrink: 0;
+  }
+
   /* Responsive */
   @media (max-width:800px) {
     .main-grid { grid-template-columns:1fr; }
@@ -494,6 +642,37 @@
 <body>
 <div class="grid-bg"></div>
 <div class="hex-bg"></div>
+
+<!-- BURGER BUTTON -->
+<button class="burger-btn" id="burger-btn" onclick="toggleBurger()" aria-label="Navigation öffnen">
+  <div class="burger-line"></div>
+  <div class="burger-line"></div>
+  <div class="burger-line"></div>
+</button>
+
+<!-- OVERLAY -->
+<div class="burger-overlay" id="burger-overlay" onclick="closeBurger()"></div>
+
+<!-- SIDE NAV -->
+<nav class="burger-nav" id="burger-nav">
+  <div class="burger-nav-header">
+    <div class="burger-nav-sys">CYBERMED-DB // NAVIGATION</div>
+    <div class="burger-nav-title">◈ SYSTEM-MENÜ</div>
+  </div>
+  <ul class="burger-links">
+    <li><div class="nav-section-label">DOKUMENTE</div></li>
+    <li><a href="#" onclick="closeBurger()"><span class="nav-icon">◈</span> NOVA FLUX — AKTE</a></li>
+    <li><a href="https://weissbaer89-create.github.io/EliasVant/"><span class="nav-icon">◈</span> ELIAS VANT — AKTE</a></li>
+    <li><div class="nav-sep"></div></li>
+    <!-- <li><div class="nav-section-label">REFERENZ</div></li>
+    <li><a href="#"><span class="nav-icon">▸</span> REGELWERK</a></li>
+    <li><a href="#"><span class="nav-icon">▸</span> WELTENBAU</a></li>
+    <li><div class="nav-sep"></div></li>
+    <li><div class="nav-section-label">SYSTEM</div></li>
+    <li><a href="#"><span class="nav-icon">⚙</span> EINSTELLUNGEN</a></li> -->
+  </ul>
+  <div class="burger-nav-footer">CYBERMED-DB v4.7.2 &nbsp;·&nbsp; SESSION AKTIV</div>
+</nav>
 
 <div class="container">
 
@@ -523,7 +702,7 @@
         <div class="portrait-area">
           <div class="portrait-grid"></div>
           <div class="portrait-scanline"></div>
- <img src="PortraitS.png" alt="Portrait" width="100%" >
+ <img src="PortraitS.png" alt="Portrait" width="278" >
           <div class="portrait-overlay">
             <div class="portrait-name">NOVA FLUX</div>
             <div class="portrait-sub">⬡ MED-SYSTEM AKTIV &nbsp;·&nbsp; SCANNER ONLINE</div>
@@ -952,7 +1131,22 @@
     if (dot) { dot.style.opacity = '0.4'; setTimeout(() => dot.style.opacity = '1', 150); }
   }, 1400);
 
-  // Init all vital bars on load
+  // ====== BURGER MENU ======
+  function toggleBurger() {
+    const open = document.getElementById('burger-nav').classList.contains('open');
+    if (open) { closeBurger(); } else {
+      document.getElementById('burger-btn').classList.add('open');
+      document.getElementById('burger-nav').classList.add('open');
+      document.getElementById('burger-overlay').classList.add('open');
+    }
+  }
+  function closeBurger() {
+    document.getElementById('burger-btn').classList.remove('open');
+    document.getElementById('burger-nav').classList.remove('open');
+    document.getElementById('burger-overlay').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBurger(); });
+
   document.querySelectorAll('.vital').forEach(panel => {
     const bar = panel.querySelector('.vital-bar');
     if (bar) adjustVital(bar);
